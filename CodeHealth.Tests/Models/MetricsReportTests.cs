@@ -1,12 +1,8 @@
-﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
+﻿using CodeHealth.Models;
+using NUnit.Framework;
+using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using CodeHealth.Models;
 using System.Xml.Serialization;
 
 namespace CodeHealth.Tests.Models
@@ -30,52 +26,58 @@ namespace CodeHealth.Tests.Models
             var metricsReport = _serializer.Deserialize(_metricsFileStream) as MetricsReport;
 
             Assert.NotNull(metricsReport);
+            AssertMetricsReport(metricsReport);
+        }
 
+        private void AssertMetricsReport(MetricsReport metricsReport)
+        {
             Assert.NotNull(metricsReport.Targets);
-            Assert.AreEqual(1, metricsReport.Targets.Count);
+            Assert.IsTrue(metricsReport.Targets.Any());
 
-            var firstTarget = metricsReport.Targets.First();
+            AssertTarget(metricsReport.Targets.First());
+        }
 
-            Assert.NotNull(firstTarget.Name);
-            Assert.NotNull(firstTarget.Modules);
-            Assert.AreEqual(1, firstTarget.Modules.Count);
+        private void AssertTarget(Target target)
+        {
+            Assert.NotNull(target.Name);
+            Assert.NotNull(target.Modules);
+            Assert.IsTrue(target.Modules.Any());
 
-            var firstModule = firstTarget.Modules.First();
+            AssertModule(target.Modules.First());
+        }
 
-            Assert.NotNull(firstModule.Name);
-            Assert.NotNull(firstModule.AssemblyVersion);
-            Assert.NotNull(firstModule.FileVersion);
-            Assert.NotNull(firstModule.Metrics);
-            Assert.AreEqual(5, firstModule.Metrics.Count);
-            Assert.NotNull(firstModule.Namespaces);
-            Assert.NotZero(firstModule.Namespaces.Count);
+        private void AssertModule(CodeHealth.Models.Module module)
+        {
+            AssertScope(module, true);
+            AssertNamespace(module.Namespaces.First());
+        }
 
-            var moduleMetric = firstModule.Metrics.First();
+        private void AssertNamespace(Namespace @namespace)
+        {
+            AssertScope(@namespace, true);
+            AssertType(@namespace.Types.First());
+        }
 
+        private void AssertType(Type type)
+        {
+            AssertScope(type, true);
+            AssertScope(type.Members.First());
+        }
+
+        private void AssertScope(Scope scope, bool assertChildren = false)
+        {
+            Assert.NotNull(scope.Name);
+            Assert.NotNull(scope.Metrics);
+            Assert.IsTrue(scope.Metrics.Any());
+            var moduleMetric = scope.Metrics.First();
             Assert.NotNull(moduleMetric.Name);
             Assert.NotNull(moduleMetric.Value);
 
-            var firstNamespace = firstModule.Namespaces.First();
-
-            Assert.NotNull(firstNamespace.Name);
-            Assert.NotNull(firstNamespace.Metrics);
-            Assert.NotZero(firstNamespace.Metrics.Count);
-            Assert.NotNull(firstNamespace.Types);
-            Assert.NotZero(firstNamespace.Types.Count);
-
-            var firstType = firstNamespace.Types.First();
-
-            Assert.NotNull(firstType.Name);
-            Assert.NotNull(firstType.Metrics);
-            Assert.NotZero(firstType.Metrics.Count);
-            Assert.NotNull(firstType.Members);
-            Assert.NotZero(firstType.Members.Count);
-
-            var firstMember = firstType.Members.First();
-
-            Assert.NotNull(firstMember.Name);
-            Assert.NotNull(firstMember.Metrics);
-            Assert.NotZero(firstMember.Metrics.Count);
+            if (assertChildren)
+            {
+                Assert.NotNull(scope.Children);
+                Assert.IsTrue(scope.Children.Any());
+            }
         }
 
         [TearDown]

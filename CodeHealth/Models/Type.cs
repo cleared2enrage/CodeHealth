@@ -1,15 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace CodeHealth.Models
 {
-    public class Type
+    public class Type : Scope
     {
-        [XmlAttribute]
-        public string Name { get; set; }
-
-        [XmlArray]
-        public List<Metric> Metrics { get; set; }
+        public override IEnumerable<Scope> Children => Members;
 
         [XmlArray]
         public List<Member> Members { get; set; }

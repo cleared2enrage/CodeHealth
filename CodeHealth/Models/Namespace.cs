@@ -3,15 +3,11 @@ using System.Xml.Serialization;
 
 namespace CodeHealth.Models
 {
-    public class Namespace
+    public class Namespace : Scope
     {
-        [XmlAttribute]
-        public string Name { get; set; }
-
-        [XmlArray]
-        public List<Metric> Metrics { get; set; }
-
         [XmlArray]
         public List<Type> Types { get; set; }
+
+        public override IEnumerable<Scope> Children => Types;
     }
 }

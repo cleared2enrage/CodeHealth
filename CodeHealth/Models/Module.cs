@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace CodeHealth.Models
 {
-    public class Module
+    public class Module : Scope
     {
-        [XmlAttribute]
-        public string Name { get; set; }
-
         [XmlAttribute]
         public string AssemblyVersion { get; set; }
 
@@ -15,9 +13,8 @@ namespace CodeHealth.Models
         public string FileVersion { get; set; }
 
         [XmlArray]
-        public List<Metric> Metrics { get; set; }
-
-        [XmlArray]
         public List<Namespace> Namespaces { get; set; }
+
+        public override IEnumerable<Scope> Children => Namespaces;
     }
 }
